@@ -1,0 +1,43 @@
+service: serverless-xhtml2pdf
+app: python-xhtml2pdf
+#org: your-org-name
+
+provider:
+  name: aws
+  runtime: python3.8
+  stage: xhtml2pdf-dev
+  region: us-east-1
+  timeout: 50
+
+layers:
+  wkhtmltoxLayer:
+    name: wkhtmltox
+    description: wkhtmltox binaries for pdf/image generation
+    package:
+      artifact: wkhtmltox-0.12.6-4.amazonlinux2_lambda.zip
+
+functions:
+  htmltopdf:
+    handler: handler.htmltopdf
+    layers:
+      - { Ref: WkhtmltoxLayerLambdaLayer }
+    environment:
+      FONTCONFIG_PATH: /opt/fonts
+    timeout: 30
+    events:
+      - http:
+          path: htmltopdf
+          method: post
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: false
+
+package:
+  exclude:
+    - node_modules/**
+    - env/**
+    - wkhtmltox-0.12.6-4.amazonlinux2_lambda.zip
